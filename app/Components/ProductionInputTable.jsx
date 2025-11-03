@@ -4,47 +4,32 @@ import { useState } from "react";
 export default function FloorTable() {
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
 
-  // State for dates - user can edit this
-  const [dates, setDates] = useState(["11/1", "11/2", "11/3", "11/4", "11/5", "11/6", "11/8"]);
+  // Only one date (like "11/1")
+  const [date, setDate] = useState("11/1");
 
-  // State for floor data
+  // Floor data — each floor has Regular, Mini, Short, and one date value
   const [data, setData] = useState(
     floors.map(() => ({
       regular: "",
       mini: "",
       short: "",
-      days: dates.map(() => ""),
+      dayValue: "",
     }))
   );
 
-  // Handle floor data change
+  // Handle input changes
   const handleChange = (i, field, value) => {
     const newData = [...data];
     newData[i][field] = value;
     setData(newData);
   };
 
-  const handleDayChange = (i, j, value) => {
-    const newData = [...data];
-    newData[i].days[j] = value;
-    setData(newData);
-  };
-
-  // Handle date change
-  const handleDateChange = (index, value) => {
-    const newDates = [...dates];
-    newDates[index] = value;
-    setDates(newDates);
-  };
-
-  // Calculate totals
+  // Totals
   const totals = {
     regular: data.reduce((t, r) => t + Number(r.regular || 0), 0),
     mini: data.reduce((t, r) => t + Number(r.mini || 0), 0),
     short: data.reduce((t, r) => t + Number(r.short || 0), 0),
-    days: dates.map((_, j) =>
-      data.reduce((t, r) => t + Number(r.days[j] || 0), 0)
-    ),
+    dayValue: data.reduce((t, r) => t + Number(r.dayValue || 0), 0),
   };
 
   const grandTotal = totals.regular + totals.mini + totals.short;
@@ -52,31 +37,41 @@ export default function FloorTable() {
   return (
     <div className="p-4 overflow-x-auto">
       <table className="border-collapse border border-gray-400 text-center">
-        <thead className="bg-green-300">
-          <tr>
+        <thead>
+          {/* Header row */}
+          <tr className="bg-green-400 font-bold">
+            <th colSpan={4} className="border border-gray-400 px-2 py-1 text-center">
+              Floor Summary
+            </th>
+            <th className="border border-gray-400 px-2 py-1 text-center">
+              Date
+            </th>
+          </tr>
+
+          {/* Labels row */}
+          <tr className="bg-green-300">
             <th className="border border-gray-400 px-2 py-1">Floor</th>
             <th className="border border-gray-400 px-2 py-1">Line (Regular)</th>
-            <th className="border border-gray-400 px-2 py-1">Mini (10-15)</th>
-            <th className="border border-gray-400 px-2 py-1">Short (20-30)</th>
-            {dates.map((date, index) => (
-              <th key={index} className="border border-gray-400 px-2 py-1">
-                <input
-                  type="text"
-                  value={date}
-                  onChange={(e) => handleDateChange(index, e.target.value)}
-                  className="w-20 text-center border-none outline-none bg-green-300"
-                />
-              </th>
-            ))}
+            <th className="border border-gray-400 px-2 py-1">Mini (10–15)</th>
+            <th className="border border-gray-400 px-2 py-1">Short (20–30)</th>
+            <th className="border border-gray-400 px-2 py-1">
+              <input
+                type="text"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-20 text-center border-none outline-none bg-green-300"
+              />
+            </th>
           </tr>
         </thead>
 
         <tbody>
           {floors.map((floor, i) => (
             <tr key={floor} className="border border-gray-400">
-              <td className="border border-gray-400 px-2 py-1 font-semibold">{floor}</td>
+              <td className="border border-gray-400 px-2 py-1 font-semibold">
+                {floor}
+              </td>
 
-              {/* Regular */}
               <td className="border border-gray-400">
                 <input
                   type="number"
@@ -86,7 +81,6 @@ export default function FloorTable() {
                 />
               </td>
 
-              {/* Mini */}
               <td className="border border-gray-400">
                 <input
                   type="number"
@@ -96,7 +90,6 @@ export default function FloorTable() {
                 />
               </td>
 
-              {/* Short */}
               <td className="border border-gray-400">
                 <input
                   type="number"
@@ -106,17 +99,14 @@ export default function FloorTable() {
                 />
               </td>
 
-              {/* Date inputs */}
-              {dates.map((_, j) => (
-                <td key={j} className="border border-gray-400">
-                  <input
-                    type="number"
-                    className="w-20 text-center border-none outline-none"
-                    value={data[i].days[j]}
-                    onChange={(e) => handleDayChange(i, j, e.target.value)}
-                  />
-                </td>
-              ))}
+              <td className="border border-gray-400">
+                <input
+                  type="number"
+                  className="w-20 text-center border-none outline-none"
+                  value={data[i].dayValue}
+                  onChange={(e) => handleChange(i, "dayValue", e.target.value)}
+                />
+              </td>
             </tr>
           ))}
 
@@ -126,16 +116,14 @@ export default function FloorTable() {
             <td className="border border-gray-400">{totals.regular}</td>
             <td className="border border-gray-400">{totals.mini}</td>
             <td className="border border-gray-400">{totals.short}</td>
-            {totals.days.map((v, i) => (
-              <td key={i} className="border border-gray-400 text-red-600">
-                {v}
-              </td>
-            ))}
+            <td className="border border-gray-400 text-red-600">
+              {totals.dayValue}
+            </td>
           </tr>
 
           {/* Grand total */}
           <tr className="font-bold bg-green-300">
-            <td colSpan={dates.length + 4} className="border border-gray-400 py-2">
+            <td colSpan={5} className="border border-gray-400 py-2">
               GRAND TOTAL (Line + Mini + Short): {grandTotal}
             </td>
           </tr>
