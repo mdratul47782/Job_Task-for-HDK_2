@@ -25,27 +25,24 @@ function LoginForm() {
       )}
 
       <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-        {/* Email */}
+        {/* Username */}
         <div className="flex flex-col">
-          <label htmlFor="email" className="mb-2 font-semibold text-gray-800">
-            Email Address
+          <label htmlFor="username" className="mb-2 font-semibold text-gray-800">
+            User Name
           </label>
           <input
-            type="email"
-            name="email"
-            id="email"
+            type="text"
+            name="username"
+            id="username"
             required
-            placeholder="you@example.com"
+            placeholder="Enter your username"
             className="px-4 py-3 rounded-xl border border-gray-300 bg-white/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition shadow-sm"
           />
         </div>
 
         {/* Password */}
         <div className="flex flex-col">
-          <label
-            htmlFor="password"
-            className="mb-2 font-semibold text-gray-800"
-          >
+          <label htmlFor="password" className="mb-2 font-semibold text-gray-800">
             Password
           </label>
           <input
@@ -66,8 +63,6 @@ function LoginForm() {
           Login
         </button>
       </form>
-
-      {/* Optional Footer */}
     </div>
   );
 }

@@ -1,22 +1,25 @@
 "use server";
 import { redirect } from "next/navigation";
-import {  findUserByCredentials } from "@/db/queries";
-
+import { userModel } from "@/app/models/user-model"; // adjust path
 
 async function performLogin(formData) {
-  const credentials = {};
-  credentials.email = formData.get("email");
-  credentials.password = formData.get("password");
-  const found = await findUserByCredentials(credentials);
+  const username = formData.get("username"); // from input field
+  const password = formData.get("password");
 
-  if (found) {
-    redirect("/DashboardClient");
-  } else {
-    throw new Error(`User with email ${formData.get("email")} not found`);
+  // Find user by username (stored in 'email' field in your DB)
+  const found = await userModel.findOne({ email: username });
+
+  if (!found) {
+    throw new Error(`User with username "${username}" not found`);
   }
+
+  // Check plain password
+  if (found.password !== password) {
+    throw new Error("Incorrect password");
+  }
+
+  // Successful login → redirect
+  redirect("/DashboardClient");
 }
-
-
-
 
 export { performLogin };
