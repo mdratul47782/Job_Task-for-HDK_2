@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 export default function HourlyReportTable() {
-  const rowsLabels = ["12H", "10H", "8H"]; // You can add more labels here
+  const rowsLabels = ["12H", "10H", "8H"];
 
   const [data, setData] = useState({
     "12H": "",
@@ -29,6 +29,12 @@ export default function HourlyReportTable() {
   };
 
   const handleSave = async () => {
+    // ✅ Validation: all fields required
+    if (!data["12H"] || !data["10H"] || !data["8H"]) {
+      setMessage("⚠️ All fields are required!");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -78,6 +84,7 @@ export default function HourlyReportTable() {
               <span>{label}:</span>
               <input
                 type="number"
+                required
                 value={data[label]}
                 onChange={(e) => handleChange(label, e.target.value)}
                 className="w-20 text-center border-none outline-none"
@@ -96,7 +103,19 @@ export default function HourlyReportTable() {
         {loading ? "Saving..." : "Save"}
       </button>
 
-      {message && <p className="mt-2 text-sm">{message}</p>}
+      {message && (
+        <p
+          className={`mt-2 text-sm ${
+            message.includes("✅")
+              ? "text-green-600"
+              : message.includes("⚠️")
+              ? "text-yellow-600"
+              : "text-red-600"
+          }`}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
 }
