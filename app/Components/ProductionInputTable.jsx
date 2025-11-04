@@ -118,6 +118,7 @@ export default function FloorTable() {
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
+                  placeholder="0"
                   value={data[i].regular}
                   onChange={(e) => handleChange(i, "regular", e.target.value)}
                 />
@@ -126,6 +127,7 @@ export default function FloorTable() {
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
+                  placeholder="0"
                   value={data[i].mini}
                   onChange={(e) => handleChange(i, "mini", e.target.value)}
                 />
@@ -135,6 +137,7 @@ export default function FloorTable() {
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
+                  placeholder="0"
                   value={data[i].short}
                   onChange={(e) => handleChange(i, "short", e.target.value)}
                 />
@@ -144,6 +147,7 @@ export default function FloorTable() {
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
+                  placeholder="0"
                   value={data[i].dayValue}
                   onChange={(e) => handleChange(i, "dayValue", e.target.value)}
                 />

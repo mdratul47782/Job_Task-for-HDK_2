@@ -88,6 +88,7 @@ export default function HourlyReportTable() {
                 value={data[label]}
                 onChange={(e) => handleChange(label, e.target.value)}
                 className="w-20 text-center border-none outline-none"
+                placeholder="0"
               />
             </div>
           </div>

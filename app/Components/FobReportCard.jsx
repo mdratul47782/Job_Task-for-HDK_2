@@ -62,7 +62,8 @@ export default function FobReportCardForm() {
 
       {/* Monthly Upto FOB */}
       <div className="flex border-b border-black">
-        <div className="border-r border-black px-3 py-2 w-40">
+        <div className="border-r border-black px-3 py-2 w-40"
+        >
           Monthly Upto FOB:
         </div>
         <div className="flex items-center justify-between px-3 py-2 w-52">
@@ -99,9 +100,10 @@ export default function FobReportCardForm() {
         <div className="border-r border-black px-3 py-2 w-40">Runday:</div>
         <input
           type="number"
-          value={runday}
+          value={runday ?? "0"}
           onChange={(e) => setRunday(e.target.value)}
           className="px-3 py-2 w-52 outline-none"
+           placeholder="0" 
         />
       </div>
 
