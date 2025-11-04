@@ -96,6 +96,7 @@ export default function FloorTable() {
             <th className="border border-gray-400 px-2 py-1">Mini (10–15)</th>
             <th className="border border-gray-400 px-2 py-1">Short (20–30)</th>
             <th className="border border-gray-400 px-2 py-1">
+              
               <input
                 type="text"
                 value={date}
@@ -129,6 +130,7 @@ export default function FloorTable() {
                 />
               </td>
               <td className="border border-gray-400">
+                
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
@@ -137,6 +139,7 @@ export default function FloorTable() {
                 />
               </td>
               <td className="border border-gray-400">
+                <span>$</span>
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
@@ -153,6 +156,8 @@ export default function FloorTable() {
             <td className="border border-gray-400">{totals.mini}</td>
             <td className="border border-gray-400">{totals.short}</td>
             <td className="border border-gray-400 text-red-600">
+              <span>$ </span>
+             
               {totals.dayValue}
             </td>
           </tr>
