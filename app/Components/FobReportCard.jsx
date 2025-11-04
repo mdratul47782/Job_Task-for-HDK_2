@@ -3,7 +3,12 @@
 import { useState } from "react";
 
 export default function FobReportCardForm() {
-  const [date, setDate] = useState("");
+  // 🔹 Automatically set today's date
+  const [date, setDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // format: YYYY-MM-DD
+  });
+
   const [monthlyUptoFOB, setMonthlyUptoFOB] = useState("");
   const [yearlyUptoFOB, setYearlyUptoFOB] = useState("");
   const [runday, setRunday] = useState("");
@@ -29,7 +34,6 @@ export default function FobReportCardForm() {
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Data saved successfully!");
-        setDate("");
         setMonthlyUptoFOB("");
         setYearlyUptoFOB("");
         setRunday("");

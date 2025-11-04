@@ -8,9 +8,9 @@ export default function Home() {
     <div className="p-2 ">
       {/* Top Row - Two Components Side by Side */}
       <div className="flex flex-col md:flex-row gap-2">
-  <FobReportCard className="flex-1" />
-  <HourlyReportTable className="flex-1" />
-</div>
+        <FobReportCard className="flex-1" />
+        <HourlyReportTable className="flex-1" />
+      </div>
 
       {/* Bottom Row - Full Width */}
       <div className="ml-0">
