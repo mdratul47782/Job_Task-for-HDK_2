@@ -1,23 +1,24 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function FloorTable({ floorReports}) {
+export default function FloorTable({ floorReports }) {
   console.log("📦 Floor Reports:", floorReports);
+
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
 
-  const [date, setDate] = useState(() => {
+  // 🔹 Today's date (MM/DD)
   const today = new Date();
-  
-  // মাস (month) JavaScript এ 0-based, তাই +1 দিতে হয়
   const month = today.getMonth() + 1;
   const day = today.getDate();
-  // const year = today.getFullYear().toString().slice(-2);
-  // Format: M/D
-  return `${month}/${day}`;
-});
+  const currentDate = `${month}/${day}`;
+
+  const [date, setDate] = useState(currentDate);
+
+  // 🔹 Check if today's data already exists
+  const existingReport = floorReports.find((r) => r.date === date);
 
   const [data, setData] = useState(
-    floors.map(() => ({
+    existingReport?.data || floors.map(() => ({
       regular: "",
       mini: "",
       short: "",
@@ -27,6 +28,13 @@ export default function FloorTable({ floorReports}) {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  // 🔹 Update form fields if existing data changes (on reload)
+  useEffect(() => {
+    if (existingReport) {
+      setData(existingReport.data);
+    }
+  }, [existingReport]);
 
   // Handle input change
   const handleChange = (i, field, value) => {
@@ -45,20 +53,19 @@ export default function FloorTable({ floorReports}) {
 
   const grandTotal = totals.regular + totals.mini + totals.short;
 
-  // Save to API
+  // 🔹 Format data before sending
+  const formattedData = data.map((item, i) => ({
+    floor: floors[i],
+    regular: Number(item.regular) || 0,
+    mini: Number(item.mini) || 0,
+    short: Number(item.short) || 0,
+    dayValue: Number(item.dayValue) || 0,
+  }));
+
+  // 🔹 Save new data
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
-
-    // Format data (replace blanks with 0)
-    const formattedData = data.map((item, i) => ({
-      floor: floors[i],
-      regular: Number(item.regular) || 0,
-      mini: Number(item.mini) || 0,
-      short: Number(item.short) || 0,
-      dayValue: Number(item.dayValue) || 0,
-    }));
-
     try {
       const res = await fetch("/api/floor-report", {
         method: "POST",
@@ -67,7 +74,6 @@ export default function FloorTable({ floorReports}) {
       });
 
       const result = await res.json();
-
       if (res.ok) {
         setMessage("✅ Saved successfully!");
       } else {
@@ -76,6 +82,31 @@ export default function FloorTable({ floorReports}) {
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to save data!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Edit existing data
+  const handleEdit = async () => {
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/floor-report", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, data: formattedData }),
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        setMessage("✅ Updated successfully!");
+      } else {
+        setMessage(`❌ Error: ${result.error}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to update data!");
     } finally {
       setLoading(false);
     }
@@ -99,12 +130,11 @@ export default function FloorTable({ floorReports}) {
             <th className="border border-gray-400 px-2 py-1">Mini (10–15)</th>
             <th className="border border-gray-400 px-2 py-1">Short (20–30)</th>
             <th className="border border-gray-400 px-2 py-1">
-              
               <input
                 type="text"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-20 text-center border-none outline-none bg-green-300"
+                disabled
+                className="w-20 text-center border-none outline-none bg-green-200 cursor-not-allowed"
               />
             </th>
           </tr>
@@ -121,7 +151,7 @@ export default function FloorTable({ floorReports}) {
                   type="number"
                   className="w-20 text-center border-none outline-none"
                   placeholder="0"
-                  value={data[i].regular}
+                  value={data[i]?.regular || ""}
                   onChange={(e) => handleChange(i, "regular", e.target.value)}
                 />
               </td>
@@ -130,17 +160,16 @@ export default function FloorTable({ floorReports}) {
                   type="number"
                   className="w-20 text-center border-none outline-none"
                   placeholder="0"
-                  value={data[i].mini}
+                  value={data[i]?.mini || ""}
                   onChange={(e) => handleChange(i, "mini", e.target.value)}
                 />
               </td>
               <td className="border border-gray-400">
-                
                 <input
                   type="number"
                   className="w-20 text-center border-none outline-none"
                   placeholder="0"
-                  value={data[i].short}
+                  value={data[i]?.short || ""}
                   onChange={(e) => handleChange(i, "short", e.target.value)}
                 />
               </td>
@@ -150,7 +179,7 @@ export default function FloorTable({ floorReports}) {
                   type="number"
                   className="w-20 text-center border-none outline-none"
                   placeholder="0"
-                  value={data[i].dayValue}
+                  value={data[i]?.dayValue || ""}
                   onChange={(e) => handleChange(i, "dayValue", e.target.value)}
                 />
               </td>
@@ -164,7 +193,6 @@ export default function FloorTable({ floorReports}) {
             <td className="border border-gray-400">{totals.short}</td>
             <td className="border border-gray-400 text-red-600">
               <span>$ </span>
-             
               {totals.dayValue}
             </td>
           </tr>
@@ -177,14 +205,26 @@ export default function FloorTable({ floorReports}) {
         </tbody>
       </table>
 
+      {/* ✅ Save or Edit button */}
       <div className="mt-4 flex items-center gap-4">
         <button
-          onClick={handleSave}
+          onClick={existingReport ? handleEdit : handleSave}
           disabled={loading}
-          className="mt-1 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          className={`mt-1 text-white px-4 py-1 rounded ${
+            existingReport
+              ? "bg-yellow-600 hover:bg-yellow-700"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {loading ? "Saving..." : "Save"}
+          {loading
+            ? existingReport
+              ? "Updating..."
+              : "Saving..."
+            : existingReport
+            ? "Edit"
+            : "Save"}
         </button>
+
         {message && <span className="text-sm">{message}</span>}
       </div>
     </div>
