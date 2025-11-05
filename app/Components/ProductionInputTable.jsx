@@ -29,10 +29,14 @@ export default function FloorTable({ floorReports }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // 🔹 Track if there’s already an existing report
+  const [hasExistingReport, setHasExistingReport] = useState(!!existingReport);
+
   // 🔹 Update form fields if existing data changes (on reload)
   useEffect(() => {
     if (existingReport) {
       setData(existingReport.data);
+      setHasExistingReport(true);
     }
   }, [existingReport]);
 
@@ -76,6 +80,8 @@ export default function FloorTable({ floorReports }) {
       const result = await res.json();
       if (res.ok) {
         setMessage("✅ Saved successfully!");
+        // 🟢 Mark as existing report immediately
+        setHasExistingReport(true);
       } else {
         setMessage(`❌ Error: ${result.error}`);
       }
@@ -143,9 +149,7 @@ export default function FloorTable({ floorReports }) {
         <tbody>
           {floors.map((floor, i) => (
             <tr key={floor} className="border border-gray-400">
-              <td className="border border-gray-400 px-2 py-1 font-semibold">
-                {floor}
-              </td>
+              <td className="border border-gray-400 px-2 py-1 font-semibold">{floor}</td>
               <td className="border border-gray-400">
                 <input
                   type="number"
@@ -208,21 +212,13 @@ export default function FloorTable({ floorReports }) {
       {/* ✅ Save or Edit button */}
       <div className="mt-4 flex items-center gap-4">
         <button
-          onClick={existingReport ? handleEdit : handleSave}
+          onClick={hasExistingReport ? handleEdit : handleSave}
           disabled={loading}
           className={`mt-1 text-white px-4 py-1 rounded ${
-            existingReport
-              ? "bg-yellow-600 hover:bg-yellow-700"
-              : "bg-blue-600 hover:bg-blue-700"
+            hasExistingReport ? "bg-yellow-600 hover:bg-yellow-700" : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
-          {loading
-            ? existingReport
-              ? "Updating..."
-              : "Saving..."
-            : existingReport
-            ? "Edit"
-            : "Save"}
+          {loading ? (hasExistingReport ? "Updating..." : "Saving...") : hasExistingReport ? "Edit" : "Save"}
         </button>
 
         {message && <span className="text-sm">{message}</span>}

@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import FobReportCard from "./FobReportCard";
 import HourlyReportTable from "./HourlyReportTable";
 import ProductionInputTable from "./ProductionInputTable";
-import Image from "next/image";
 
 export default function DashboardClient({
   floorReports,
@@ -12,9 +12,6 @@ export default function DashboardClient({
   hourlyReports,
   users,
 }) {
-
-
-
   const [dateTime, setDateTime] = useState(new Date());
 
   // Update every second
@@ -71,7 +68,10 @@ export default function DashboardClient({
           {/* Top Row - Two Components Side by Side */}
           <div className="flex flex-col md:flex-row gap-2">
             <FobReportCard className="flex-1" fobReports={fobReports} />
-            <HourlyReportTable className="flex-1" hourlyReports={hourlyReports} />
+            <HourlyReportTable
+              className="flex-1"
+              hourlyReports={hourlyReports}
+            />
           </div>
 
           {/* Bottom Row - Full Width */}

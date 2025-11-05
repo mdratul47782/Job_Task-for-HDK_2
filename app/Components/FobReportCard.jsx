@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 
 export default function FobReportCardForm({ fobReports }) {
-  // 🔹 Fixed today's date
+  // 🔹 Today's date
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
 
-  // 🔹 Check if today's report already exists
+  // 🔹 Find if today's report already exists in props
   const existingReport = fobReports.find((r) => r.date === date);
 
+  // 🔹 Form states
   const [monthlyUptoFOB, setMonthlyUptoFOB] = useState(
     existingReport?.monthlyUptoFOB || ""
   );
@@ -20,12 +21,16 @@ export default function FobReportCardForm({ fobReports }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 🔹 When existing data changes (like on refresh)
+  // 🔹 Track if there’s already an existing report
+  const [hasExistingReport, setHasExistingReport] = useState(!!existingReport);
+
+  // 🔹 Sync when existing report changes (e.g., on refresh)
   useEffect(() => {
     if (existingReport) {
       setMonthlyUptoFOB(existingReport.monthlyUptoFOB);
       setYearlyUptoFOB(existingReport.yearlyUptoFOB);
       setRunday(existingReport.runday);
+      setHasExistingReport(true);
     }
   }, [existingReport]);
 
@@ -49,10 +54,14 @@ export default function FobReportCardForm({ fobReports }) {
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Data saved successfully!");
+
+        // 🟢 Mark as existing report immediately
+        setHasExistingReport(true);
       } else {
         setMessage(`❌ Error: ${data.error || "Failed to save data"}`);
       }
     } catch (error) {
+      console.error("Save failed:", error);
       setMessage("❌ Something went wrong!");
     } finally {
       setLoading(false);
@@ -69,7 +78,7 @@ export default function FobReportCardForm({ fobReports }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date, // key for update
+          date,
           monthlyUptoFOB,
           yearlyUptoFOB,
           runday,
@@ -83,6 +92,7 @@ export default function FobReportCardForm({ fobReports }) {
         setMessage(`❌ Error: ${data.error || "Failed to update data"}`);
       }
     } catch (error) {
+      console.error("Edit failed:", error);
       setMessage("❌ Something went wrong!");
     } finally {
       setLoading(false);
@@ -150,24 +160,36 @@ export default function FobReportCardForm({ fobReports }) {
 
       {/* Save or Edit Button */}
       <button
-        onClick={existingReport ? handleEdit : handleSave}
+        onClick={hasExistingReport ? handleEdit : handleSave}
         disabled={loading}
         className={`mt-3 text-white px-4 py-2 rounded ${
-          existingReport
+          hasExistingReport
             ? "bg-yellow-600 hover:bg-yellow-700"
             : "bg-blue-600 hover:bg-blue-700"
         }`}
       >
         {loading
-          ? existingReport
+          ? hasExistingReport
             ? "Updating..."
             : "Saving..."
-          : existingReport
+          : hasExistingReport
           ? "Edit"
           : "Save"}
       </button>
 
-      {message && <p className="mt-2 text-sm">{message}</p>}
+      {message && (
+        <p
+          className={`mt-2 text-sm ${
+            message.includes("✅")
+              ? "text-green-600"
+              : message.includes("❌")
+              ? "text-red-600"
+              : "text-yellow-600"
+          }`}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
 }
