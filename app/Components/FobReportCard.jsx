@@ -1,21 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function FobReportCardForm({ fobReports }) {
-  // 🔹 Automatically set today's date
-  const [date, setDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split("T")[0]; // format: YYYY-MM-DD
-  });
-  console.log("🚩 Fob Reports:", fobReports);
-  const [monthlyUptoFOB, setMonthlyUptoFOB] = useState("");
-  const [yearlyUptoFOB, setYearlyUptoFOB] = useState("");
-  const [runday, setRunday] = useState("");
+  // 🔹 Fixed today's date
+  const today = new Date().toISOString().split("T")[0];
+  const [date, setDate] = useState(today);
+
+  // 🔹 Check if today's report already exists
+  const existingReport = fobReports.find((r) => r.date === date);
+
+  const [monthlyUptoFOB, setMonthlyUptoFOB] = useState(
+    existingReport?.monthlyUptoFOB || ""
+  );
+  const [yearlyUptoFOB, setYearlyUptoFOB] = useState(
+    existingReport?.yearlyUptoFOB || ""
+  );
+  const [runday, setRunday] = useState(existingReport?.runday || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async () => {
+  // 🔹 When existing data changes (like on refresh)
+  useEffect(() => {
+    if (existingReport) {
+      setMonthlyUptoFOB(existingReport.monthlyUptoFOB);
+      setYearlyUptoFOB(existingReport.yearlyUptoFOB);
+      setRunday(existingReport.runday);
+    }
+  }, [existingReport]);
+
+  // 🔹 Save new report
+  const handleSave = async () => {
     setLoading(true);
     setMessage("");
 
@@ -34,9 +49,6 @@ export default function FobReportCardForm({ fobReports }) {
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Data saved successfully!");
-        setMonthlyUptoFOB("");
-        setYearlyUptoFOB("");
-        setRunday("");
       } else {
         setMessage(`❌ Error: ${data.error || "Failed to save data"}`);
       }
@@ -47,16 +59,46 @@ export default function FobReportCardForm({ fobReports }) {
     }
   };
 
+  // 🔹 Edit existing report
+  const handleEdit = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/fobreport", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date, // key for update
+          monthlyUptoFOB,
+          yearlyUptoFOB,
+          runday,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("✅ Data updated successfully!");
+      } else {
+        setMessage(`❌ Error: ${data.error || "Failed to update data"}`);
+      }
+    } catch (error) {
+      setMessage("❌ Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="border border-black w-fit text-sm font-semibold p-3 space-y-2">
-      {/* Date Input */}
+      {/* Date Input (disabled) */}
       <div className="flex border-b border-black">
         <div className="border-r border-black px-3 py-2">DATE:</div>
         <input
           type="date"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="px-3 py-2 w-52 outline-none"
+          disabled
+          className="px-3 py-2 w-52 outline-none bg-gray-100 cursor-not-allowed"
         />
       </div>
 
@@ -106,13 +148,23 @@ export default function FobReportCardForm({ fobReports }) {
         />
       </div>
 
-      {/* Save Button */}
+      {/* Save or Edit Button */}
       <button
-        onClick={handleSubmit}
+        onClick={existingReport ? handleEdit : handleSave}
         disabled={loading}
-        className="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        className={`mt-3 text-white px-4 py-2 rounded ${
+          existingReport
+            ? "bg-yellow-600 hover:bg-yellow-700"
+            : "bg-blue-600 hover:bg-blue-700"
+        }`}
       >
-        {loading ? "Saving..." : "Save"}
+        {loading
+          ? existingReport
+            ? "Updating..."
+            : "Saving..."
+          : existingReport
+          ? "Edit"
+          : "Save"}
       </button>
 
       {message && <p className="mt-2 text-sm">{message}</p>}
