@@ -100,7 +100,7 @@ export default function FobReportCardForm() {
         <div className="border-r border-black px-3 py-2 w-40">Runday:</div>
         <input
           type="number"
-          value={runday ?? "0"}
+          value={runday }
           onChange={(e) => setRunday(e.target.value)}
           className="px-3 py-2 w-52 outline-none"
            placeholder="0" 

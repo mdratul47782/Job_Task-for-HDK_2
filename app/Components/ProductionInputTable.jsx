@@ -6,6 +6,7 @@ export default function FloorTable() {
 
   const [date, setDate] = useState(() => {
   const today = new Date();
+  
   // মাস (month) JavaScript এ 0-based, তাই +1 দিতে হয়
   const month = today.getMonth() + 1;
   const day = today.getDate();
