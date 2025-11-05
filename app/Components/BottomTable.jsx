@@ -1,114 +1,176 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function FloorTable() {
+export default function FloorTable({floorReports, fobReports, hourlyReports, users}) {
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
+  
+  // Generate dates for today and previous 6 days
+  const generateDates = () => {
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      dates.push(`${month}/${day}`);
+    }
+    return dates;
+  };
 
-  // Dates - editable by user
-  const [dates, setDates] = useState([
-    "11/5", "11/6", "11/7", "11/8", "11/9", "11/10", "11/11"
-  ]);
-
-  // Floor data
+  const [dates, setDates] = useState(generateDates());
   const [data, setData] = useState(
     floors.map(() => ({
-      regular: "",
-      mini: "",
-      short: "",
-      days: dates.map(() => "")
+      regular: 0,
+      mini: 0,
+      short: 0,
+      days: dates.map(() => 0)
     }))
   );
+  const [hourlyData, setHourlyData] = useState({
+    "12H": 0,
+    "10H": 0,
+    "8H": 0
+  });
 
-  // Floor column change
+  console.log("📦 Floor Reports:", floorReports);
+  console.log("⏰ Hourly Reports:", hourlyReports);
+
+  // Load data from reports
+  useEffect(() => {
+    if (!floorReports || !hourlyReports) return;
+
+    // Load hourly data for today
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const todayHourlyReport = hourlyReports.find(report => report.date === today);
+    
+    if (todayHourlyReport && todayHourlyReport.data) {
+      setHourlyData({
+        "12H": todayHourlyReport.data["12H"] || 0,
+        "10H": todayHourlyReport.data["10H"] || 0,
+        "8H": todayHourlyReport.data["8H"] || 0
+      });
+    }
+
+    // Load floor data
+    const newData = floors.map((floor) => {
+      const floorData = {
+        regular: 0,
+        mini: 0,
+        short: 0,
+        days: dates.map(() => 0)
+      };
+
+      dates.forEach((dateStr, dayIndex) => {
+        const report = floorReports.find(r => r.date === dateStr);
+        
+        if (report && report.data) {
+          const floorEntry = report.data.find(d => d.floor === floor);
+          
+          if (floorEntry) {
+            // Set regular, mini, short for today (last date)
+            if (dayIndex === dates.length - 1) {
+              floorData.regular = floorEntry.regular || 0;
+              floorData.mini = floorEntry.mini || 0;
+              floorData.short = floorEntry.short || 0;
+            }
+            
+            // Set day value
+            floorData.days[dayIndex] = floorEntry.dayValue || 0;
+          }
+        }
+      });
+
+      return floorData;
+    });
+
+    setData(newData);
+  }, [floorReports, hourlyReports]);
+
   const handleChange = (i, field, value) => {
     const newData = [...data];
     newData[i][field] = value;
     setData(newData);
   };
 
-  // Date cell change
   const handleDayChange = (i, j, value) => {
     const newData = [...data];
     newData[i].days[j] = value;
     setData(newData);
   };
 
-  // Date header change
   const handleDateChange = (index, value) => {
     const newDates = [...dates];
     newDates[index] = value;
     setDates(newDates);
   };
 
-  // Totals
   const totals = {
     regular: data.reduce((t, r) => t + Number(r.regular || 0), 0),
     mini: data.reduce((t, r) => t + Number(r.mini || 0), 0),
     short: data.reduce((t, r) => t + Number(r.short || 0), 0),
-    days: dates.map((_, j) =>
-      data.reduce((t, r) => t + Number(r.days[j] || 0), 0)
-    )
+    days: dates.map((_, j) => data.reduce((t, r) => t + Number(r.days[j] || 0), 0))
   };
-
   const grandTotal = totals.regular + totals.mini + totals.short;
 
   return (
-    <div className="p-4 overflow-x-auto">
-      <table className="border-collapse border border-gray-400 text-center">
-        <thead className="bg-green-300">
+    <div className="w-full max-w-7xl mx-auto p-6 rounded-3xl border border-blue-200/60 bg-gradient-to-b from-blue-50 to-blue-100 shadow-2xl overflow-x-auto">
+      <table className="min-w-full border-collapse border border-blue-300 rounded-lg shadow-md overflow-hidden">
+        <thead className="bg-gradient-to-r from-blue-400 to-blue-500 text-white sticky top-0 z-10">
           <tr>
-            <th className="border border-gray-400 px-2 py-1">Floor</th>
-            <th className="border border-gray-400 px-2 py-1">Line (Regular)</th>
-            <th className="border border-gray-400 px-2 py-1">Mini (10-15)</th>
-            <th className="border border-gray-400 px-2 py-1">Short (20-30)</th>
+            <th className="border border-blue-300 px-3 py-3 text-sm font-semibold">Floor</th>
+            <th className="border border-blue-300 px-3 py-3 text-sm font-semibold">Line (Regular)</th>
+            <th className="border border-blue-300 px-3 py-3 text-sm font-semibold">Mini (10–15)</th>
+            <th className="border border-blue-300 px-3 py-3 text-sm font-semibold">Short (20–30)</th>
+
             {dates.map((date, index) => (
-              <th key={index} className="border border-gray-400 px-2 py-1">
-                <input
-                  type="text"
-                  value={date}
-                  onChange={(e) => handleDateChange(index, e.target.value)}
-                  className="w-20 text-center border-none outline-none bg-green-300"
-                />
+              <th key={index} className="border border-blue-300 px-3 py-2 text-center bg-gradient-to-b from-blue-300 to-blue-200 text-gray-800">
+                <div className="flex flex-col items-center justify-center space-y-1">
+                  {index === dates.length - 1 ? (
+                    <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
+                      <span>12H: {hourlyData["12H"]}</span>
+                      <span>10H: {hourlyData["10H"]}</span>
+                      <span>8H: {hourlyData["8H"]}</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
+                      <span>12H:</span>
+                      <span>10H:</span>
+                      <span>8H:</span>
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    value={date}
+                    onChange={(e) => handleDateChange(index, e.target.value)}
+                    className="w-16 mt-1 text-center border border-blue-300 rounded-md text-xs bg-white/80 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all shadow-sm"
+                  />
+                </div>
               </th>
             ))}
           </tr>
         </thead>
 
-        <tbody>
+        <tbody className="text-sm text-gray-700">
           {floors.map((floor, i) => (
-            <tr key={floor} className="border border-gray-400">
-              <td className="border border-gray-400 px-2 py-1 font-semibold">{floor}</td>
-              <td className="border border-gray-400">
-                <input
-                  type="number"
-                  className="w-20 text-center border-none outline-none"
-                  value={data[i].regular}
-                  onChange={(e) => handleChange(i, "regular", e.target.value)}
-                />
-              </td>
-              <td className="border border-gray-400">
-                <input
-                  type="number"
-                  className="w-20 text-center border-none outline-none"
-                  value={data[i].mini}
-                  onChange={(e) => handleChange(i, "mini", e.target.value)}
-                />
-              </td>
-              <td className="border border-gray-400">
-                <input
-                  type="number"
-                  className="w-20 text-center border-none outline-none"
-                  value={data[i].short}
-                  onChange={(e) => handleChange(i, "short", e.target.value)}
-                />
-              </td>
+            <tr key={floor} className="even:bg-blue-50 odd:bg-white hover:bg-blue-100/70 transition-colors border-b border-blue-200">
+              <td className="px-2 py-2 font-semibold text-gray-800 bg-gray-100 border border-blue-200">{floor}</td>
 
-              {/* Date columns */}
-              {dates.map((_, j) => (
-                <td key={j} className="border border-gray-400">
+              {["regular", "mini", "short"].map((type) => (
+                <td key={type} className="border border-blue-200">
                   <input
                     type="number"
-                    className="w-20 text-center border-none outline-none"
+                    className="w-20 text-center border-none bg-transparent focus:ring-1 focus:ring-blue-300 rounded-md outline-none"
+                    value={data[i][type]}
+                    onChange={(e) => handleChange(i, type, e.target.value)}
+                  />
+                </td>
+              ))}
+
+              {dates.map((_, j) => (
+                <td key={j} className="border border-blue-200">
+                  <input
+                    type="number"
+                    className="w-16 text-center border-none bg-transparent focus:ring-1 focus:ring-blue-300 rounded-md outline-none"
                     value={data[i].days[j]}
                     onChange={(e) => handleDayChange(i, j, e.target.value)}
                   />
@@ -117,21 +179,21 @@ export default function FloorTable() {
             </tr>
           ))}
 
-          {/* Totals row */}
-          <tr className="font-bold bg-green-100">
-            <td className="border border-gray-400">TOTAL</td>
-            <td className="border border-gray-400">{totals.regular}</td>
-            <td className="border border-gray-400">{totals.mini}</td>
-            <td className="border border-gray-400">{totals.short}</td>
+          <tr className="font-semibold bg-gradient-to-r from-green-100 to-green-200 text-gray-800 border-t-2 border-green-400">
+            <td className="border border-green-300 py-2">TOTAL</td>
+            <td className="border border-green-300">{totals.regular}</td>
+            <td className="border border-green-300">{totals.mini}</td>
+            <td className="border border-green-300">{totals.short}</td>
             {totals.days.map((v, i) => (
-              <td key={i} className="border border-gray-400 text-red-600">{v}</td>
+              <td key={i} className="border border-green-300 text-blue-800 font-bold">
+                {v}
+              </td>
             ))}
           </tr>
 
-          {/* Grand total */}
-          <tr className="font-bold bg-green-300">
-            <td colSpan={dates.length + 4} className="border border-gray-400 py-2">
-              GRAND TOTAL (Line + Mini + Short): {grandTotal}
+          <tr className="font-bold bg-gradient-to-r from-blue-500 to-green-400 text-white text-center">
+            <td colSpan={dates.length + 4} className="py-3">
+              GRAND TOTAL (Line + Mini + Short): <span className="text-yellow-200">{grandTotal}</span>
             </td>
           </tr>
         </tbody>

@@ -1,81 +1,125 @@
 "use client";
+import { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 
-export default function FobSummary() {
-  const weekInputs = {
-    monthly: ["12H:", "12H:", "12H:", "12H:", "12H:", "12H:", "12H:"],
-    yearly: ["10H:", "10H:", "10H:", "10H:", "10H:", "10H:", "10H:"],
-    run: ["8H:", "8H:", "8H:", "8H:", "8H:", "8H:", "8H:"],
+export default function DashboardPage({floorReports, fobReports, hourlyReports, users}) {
+  const [dateTime, setDateTime] = useState(new Date());
+  const [dashboardData, setDashboardData] = useState({
+    monthlyUptoFOB: 0,
+    yearlyUptoFOB: 0,
+    runday: 0
+  });
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Memoize today's date to prevent hydration issues
+  const todayDate = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setDateTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Load data from fobReports
+  useEffect(() => {
+    if (!fobReports || fobReports.length === 0) return;
+
+    // Find today's report
+    const todayReport = fobReports.find(report => report.date === todayDate);
+    
+    if (todayReport) {
+      setDashboardData({
+        monthlyUptoFOB: todayReport.monthlyUptoFOB || 0,
+        yearlyUptoFOB: todayReport.yearlyUptoFOB || 0,
+        runday: todayReport.runday || 0
+      });
+    } else {
+      // If no report for today, try to get the most recent report
+      const sortedReports = [...fobReports].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      
+      if (sortedReports.length > 0) {
+        const latestReport = sortedReports[0];
+        setDashboardData({
+          monthlyUptoFOB: latestReport.monthlyUptoFOB || 0,
+          yearlyUptoFOB: latestReport.yearlyUptoFOB || 0,
+          runday: latestReport.runday || 0
+        });
+      }
+    }
+    
+    setIsLoaded(true);
+  }, [fobReports, todayDate]);
+
+  // Format currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto mt-10 bg-gradient-to-b from-blue-100 to-blue-200 rounded-3xl shadow-xl border border-blue-300/50 p-6">
-      <h2 className="text-2xl font-bold text-blue-900 text-center mb-6">
-        Weekly Work Hours Overview
-      </h2>
+    <div className="w-full bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center p-6">
+      {/* 🌿 Logo and Header */}
+      <div className="w-full flex flex-col items-center justify-center text-center space-y-2 mb-6">
+        <div className="flex items-center justify-center gap-3">
+          <Image
+            src="/1630632533544-removebg-preview.png"
+            alt="Company Logo"
+            width={60}
+            height={60}
+            className="rounded-full shadow-md"
+            priority
+          />
+          <h1 className="text-4xl font-bold text-blue-900 tracking-wide drop-shadow-sm">
+            HKD Outdoor Innovations Ltd.
+          </h1>
+        </div>
+        <h2 className="text-2xl text-gray-1000 font-large">📊 Visual Dashboard</h2>
+      </div>
 
-      {/* Layout: 3 rows */}
-      <div className="flex flex-col gap-4">
-        {/* === Row 1: Monthly Updated FOB === */}
-        <div className="flex items-center justify-between bg-blue-100/70 p-3 rounded-xl shadow-sm">
-          {/* Left side */}
-          <div className="flex items-center gap-2 w-1/3">
-            <span className="font-semibold text-blue-900 w-48">
-              Monthly Updated FOB:
-            </span>
-            <span className="font-bold text-blue-800 text-lg">$0</span>
-          </div>
-
-          {/* Right side: 7 input boxes */}
-          <div className="flex gap-2 w-2/3 justify-end">
-            {weekInputs.monthly.map((val, i) => (
-              <input
-                key={i}
-                type="text"
-                defaultValue={val}
-                className="w-14 text-center px-2 py-1 rounded-md border border-blue-300 bg-white/70 text-blue-900 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-            ))}
-          </div>
+      {/* 🔹 Info Cards (Equal Height & Width) */}
+      <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Monthly FOB */}
+        <div className="flex flex-col items-center justify-center bg-white border border-blue-200 rounded-2xl shadow-md p-5 h-36">
+          <span className="text-blue-700 text-2xl">📅</span>
+          <h3 className="font-semibold text-blue-900 text-lg mt-1">Monthly FOB</h3>
+          <p className="font-bold text-blue-800 text-xl mt-2">
+            {isLoaded ? formatCurrency(dashboardData.monthlyUptoFOB) : '$0'}
+          </p>
         </div>
 
-        {/* === Row 2: Yearly Updated FOB === */}
-        <div className="flex items-center justify-between bg-blue-100/70 p-3 rounded-xl shadow-sm">
-          <div className="flex items-center gap-2 w-1/3">
-            <span className="font-semibold text-blue-900 w-48">
-              Yearly Updated FOB:
-            </span>
-            <span className="font-bold text-blue-800 text-lg">$0</span>
-          </div>
-
-          <div className="flex gap-2 w-2/3 justify-end">
-            {weekInputs.yearly.map((val, i) => (
-              <input
-                key={i}
-                type="text"
-                defaultValue={val}
-                className="w-14 text-center px-2 py-1 rounded-md border border-blue-300 bg-white/70 text-blue-900 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-            ))}
-          </div>
+        {/* Yearly FOB */}
+        <div className="flex flex-col items-center justify-center bg-white border border-green-200 rounded-2xl shadow-md p-5 h-36">
+          <span className="text-green-700 text-2xl">📈</span>
+          <h3 className="font-semibold text-green-900 text-lg mt-1">Yearly FOB</h3>
+          <p className="font-bold text-green-800 text-xl mt-2">
+            {isLoaded ? formatCurrency(dashboardData.yearlyUptoFOB) : '$0'}
+          </p>
         </div>
 
-        {/* === Row 3: Run Day === */}
-        <div className="flex items-center justify-between bg-blue-100/70 p-3 rounded-xl shadow-sm">
-          <div className="flex items-center gap-2 w-1/3">
-            <span className="font-semibold text-blue-900 w-48">Run Day:</span>
-            <span className="font-bold text-blue-800 text-lg">0</span>
-          </div>
+        {/* Run Day */}
+        <div className="flex flex-col items-center justify-center bg-white border border-purple-200 rounded-2xl shadow-md p-5 h-36">
+          <span className="text-purple-700 text-2xl">🏃</span>
+          <h3 className="font-semibold text-purple-900 text-lg mt-1">Run Day</h3>
+          <p className="font-bold text-purple-800 text-xl mt-2">
+            {isLoaded ? dashboardData.runday : 0}
+          </p>
+        </div>
 
-          <div className="flex gap-2 w-2/3 justify-end">
-            {weekInputs.run.map((val, i) => (
-              <input
-                key={i}
-                type="text"
-                defaultValue={val}
-                className="w-14 text-center px-2 py-1 rounded-md border border-blue-300 bg-white/70 text-blue-900 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-            ))}
-          </div>
+        {/* Date & Time */}
+        <div className="flex flex-col items-center justify-center bg-white border border-gray-300 rounded-2xl shadow-md p-5 h-36">
+          <span className="text-gray-700 text-2xl">⏰</span>
+          <h3 className="font-semibold text-gray-900 text-lg mt-1">Date & Time</h3>
+          <p className="font-bold text-gray-800 text-md mt-1">
+            {dateTime.toLocaleDateString()}
+          </p>
+          <p className="text-gray-600 text-sm">
+            {dateTime.toLocaleTimeString()}
+          </p>
         </div>
       </div>
     </div>
