@@ -1,11 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 export default function FloorTable({floorReports, fobReports, hourlyReports, users}) {
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
   
-  // Generate dates for today and previous 6 days
-  const generateDates = () => {
+  // Memoize dates to prevent regeneration
+  const initialDates = useMemo(() => {
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
@@ -15,15 +15,15 @@ export default function FloorTable({floorReports, fobReports, hourlyReports, use
       dates.push(`${month}/${day}`);
     }
     return dates;
-  };
+  }, []);
 
-  const [dates, setDates] = useState(generateDates());
+  const [dates, setDates] = useState(initialDates);
   const [data, setData] = useState(
     floors.map(() => ({
       regular: 0,
       mini: 0,
       short: 0,
-      days: dates.map(() => 0)
+      days: initialDates.map(() => 0)
     }))
   );
   const [hourlyData, setHourlyData] = useState({
@@ -31,11 +31,12 @@ export default function FloorTable({floorReports, fobReports, hourlyReports, use
     "10H": 0,
     "8H": 0
   });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   console.log("📦 Floor Reports:", floorReports);
   console.log("⏰ Hourly Reports:", hourlyReports);
 
-  // Load data from reports
+  // Load data from reports - will auto-update when props change
   useEffect(() => {
     if (!floorReports || !hourlyReports) return;
 
@@ -57,10 +58,10 @@ export default function FloorTable({floorReports, fobReports, hourlyReports, use
         regular: 0,
         mini: 0,
         short: 0,
-        days: dates.map(() => 0)
+        days: initialDates.map(() => 0)
       };
 
-      dates.forEach((dateStr, dayIndex) => {
+      initialDates.forEach((dateStr, dayIndex) => {
         const report = floorReports.find(r => r.date === dateStr);
         
         if (report && report.data) {
@@ -68,7 +69,7 @@ export default function FloorTable({floorReports, fobReports, hourlyReports, use
           
           if (floorEntry) {
             // Set regular, mini, short for today (last date)
-            if (dayIndex === dates.length - 1) {
+            if (dayIndex === initialDates.length - 1) {
               floorData.regular = floorEntry.regular || 0;
               floorData.mini = floorEntry.mini || 0;
               floorData.short = floorEntry.short || 0;
@@ -84,7 +85,8 @@ export default function FloorTable({floorReports, fobReports, hourlyReports, use
     });
 
     setData(newData);
-  }, [floorReports, hourlyReports]);
+    setIsLoaded(true);
+  }, [floorReports, hourlyReports, initialDates]); // Re-runs when props change
 
   const handleChange = (i, field, value) => {
     const newData = [...data];
@@ -125,7 +127,7 @@ export default function FloorTable({floorReports, fobReports, hourlyReports, use
             {dates.map((date, index) => (
               <th key={index} className="border border-blue-300 px-3 py-2 text-center bg-gradient-to-b from-blue-300 to-blue-200 text-gray-800">
                 <div className="flex flex-col items-center justify-center space-y-1">
-                  {index === dates.length - 1 ? (
+                  {index === dates.length - 1 && isLoaded ? (
                     <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
                       <span>12H: {hourlyData["12H"]}</span>
                       <span>10H: {hourlyData["10H"]}</span>
