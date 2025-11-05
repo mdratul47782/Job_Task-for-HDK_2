@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 
-export default function HourlyReportTable() {
+export default function HourlyReportTable({ hourlyReports }) {
+  console.log("⏰ Hourly Reports:", hourlyReports);
   const rowsLabels = ["12H", "10H", "8H"];
 
   const [data, setData] = useState({

@@ -6,7 +6,15 @@ import HourlyReportTable from "./HourlyReportTable";
 import ProductionInputTable from "./ProductionInputTable";
 import Image from "next/image";
 
-export default function DashboardClient() {
+export default function DashboardClient({
+  floorReports,
+  fobReports,
+  hourlyReports,
+  users,
+}) {
+
+
+
   const [dateTime, setDateTime] = useState(new Date());
 
   // Update every second
@@ -47,7 +55,7 @@ export default function DashboardClient() {
         </div>
       </div>
 
-      {/* 🕒 Modern Clock (Top Right) */}
+      {/* 🕒 Modern Clock (Top Right)
       <div className="absolute top-8 right-12 bg-white/70 backdrop-blur-md px-6 py-3 rounded-2xl shadow-lg border border-white/30 text-gray-800 text-center">
         <div className="text-lg font-semibold tracking-wider">
           {formattedDate}
@@ -55,20 +63,20 @@ export default function DashboardClient() {
         <div className="text-3xl font-bold text-indigo-700 mt-1 animate-pulse">
           {formattedTime}
         </div>
-      </div>
+      </div> */}
 
       {/* Main Dashboard Content */}
       <div className="flex flex-col justify-center items-center w-full">
         <div className="w-full max-w-7xl mt-24">
           {/* Top Row - Two Components Side by Side */}
           <div className="flex flex-col md:flex-row gap-2">
-            <FobReportCard className="flex-1" />
-            <HourlyReportTable className="flex-1" />
+            <FobReportCard className="flex-1" fobReports={fobReports} />
+            <HourlyReportTable className="flex-1" hourlyReports={hourlyReports} />
           </div>
 
           {/* Bottom Row - Full Width */}
           <div className="mt-4">
-            <ProductionInputTable />
+            <ProductionInputTable floorReports={floorReports} />
           </div>
         </div>
       </div>

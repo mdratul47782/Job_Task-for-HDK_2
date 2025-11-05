@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-export default function FobReportCardForm() {
+export default function FobReportCardForm({ fobReports }) {
   // 🔹 Automatically set today's date
   const [date, setDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // format: YYYY-MM-DD
   });
-
+  console.log("🚩 Fob Reports:", fobReports);
   const [monthlyUptoFOB, setMonthlyUptoFOB] = useState("");
   const [yearlyUptoFOB, setYearlyUptoFOB] = useState("");
   const [runday, setRunday] = useState("");
@@ -62,8 +62,7 @@ export default function FobReportCardForm() {
 
       {/* Monthly Upto FOB */}
       <div className="flex border-b border-black">
-        <div className="border-r border-black px-3 py-2 w-40"
-        >
+        <div className="border-r border-black px-3 py-2 w-40">
           Monthly Upto FOB:
         </div>
         <div className="flex items-center justify-between px-3 py-2 w-52">
@@ -100,10 +99,10 @@ export default function FobReportCardForm() {
         <div className="border-r border-black px-3 py-2 w-40">Runday:</div>
         <input
           type="number"
-          value={runday }
+          value={runday}
           onChange={(e) => setRunday(e.target.value)}
           className="px-3 py-2 w-52 outline-none"
-           placeholder="0" 
+          placeholder="0"
         />
       </div>
 

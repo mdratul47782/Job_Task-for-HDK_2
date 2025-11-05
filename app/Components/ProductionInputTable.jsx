@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 
-export default function FloorTable() {
+export default function FloorTable({ floorReports}) {
+  console.log("📦 Floor Reports:", floorReports);
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
 
   const [date, setDate] = useState(() => {
