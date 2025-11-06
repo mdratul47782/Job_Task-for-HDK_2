@@ -52,6 +52,19 @@ export default function DashboardClient({
         </div>
       </div>
 
+      {/* Visual Dashboard Button (Top Right) */}
+      <div className="absolute top-6 right-11">
+        <a
+          href="/VisualDashboard"
+          className="inline-block bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          <span className="flex items-center gap-2">
+            <span className="text-xl">📊</span>
+            <span>Visual Dashboard</span>
+          </span>
+        </a>
+      </div>
+
       {/* 🕒 Modern Clock (Top Right)
       <div className="absolute top-8 right-12 bg-white/70 backdrop-blur-md px-6 py-3 rounded-2xl shadow-lg border border-white/30 text-gray-800 text-center">
         <div className="text-lg font-semibold tracking-wider">
