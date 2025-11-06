@@ -48,7 +48,7 @@ export default function DashboardDataProvider({ initialData }) {
       <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-2">
         <div className={`w-3 h-3 rounded-full ${loading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
         <span className="text-sm text-gray-700">
-          {loading ? "Refreshing..." : `Last update: ${lastUpdate.toLocaleTimeString()}`}
+          {loading ? "Refreshing..." : `Last Update: ${lastUpdate.toLocaleTimeString()}`}
         </span>
       </div>
 

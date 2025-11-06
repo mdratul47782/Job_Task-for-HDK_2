@@ -19,9 +19,14 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
     return () => clearInterval(timer);
   }, []);
 
-  // Load data from fobReports
+  // Load data from fobReports - NOW UPDATES EVERY TIME fobReports CHANGES
   useEffect(() => {
-    if (!fobReports || fobReports.length === 0) return;
+    if (!fobReports || fobReports.length === 0) {
+      setIsLoaded(true);
+      return;
+    }
+
+    console.log("📊 Dashboard updating with new fobReports data");
 
     // Find today's report
     const todayReport = fobReports.find(report => report.date === todayDate);
@@ -49,7 +54,7 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
     }
     
     setIsLoaded(true);
-  }, [fobReports, todayDate]);
+  }, [fobReports, todayDate]); // This dependency is correct
 
   // Format currency
   const formatCurrency = (value) => {
