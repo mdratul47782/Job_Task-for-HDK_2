@@ -83,7 +83,11 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
             HKD Outdoor Innovations Ltd.
           </h1>
         </div>
-        <h2 className="text-2xl text-gray-1000 font-large">📊 Visual Dashboard</h2>
+        <h2 className="text-3xl font-semibold text-gray-900 relative inline-block px-3 py-2">
+  📊 Visual Dashboard
+  <span className="absolute left-0 bottom-0 w-full h-1 bg-blue-500 rounded-full"></span>
+</h2>
+
       </div>
 
       {/* 🔹 Info Cards (Equal Height & Width) */}

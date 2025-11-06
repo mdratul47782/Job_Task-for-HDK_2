@@ -105,7 +105,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
                 key={index}
                 className="border border-blue-300 px-3 py-2 text-center bg-gradient-to-b from-blue-300 to-blue-200 text-gray-800"
               >
-                <div className="flex flex-col items-center justify-center space-y-1">
+                <div className="flex flex-col items-center justify-center space-y-1 border-4 border-blue-100 rounded-lg p-2 bg-blue-50 shadow-sm">
                   {index === dates.length - 1 && isLoaded ? (
                     <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
                       <span>12H: {(hourlyData["12H"])}</span>
@@ -119,7 +119,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
                       <span>8H:</span>
                     </div>
                   )}
-                  <div className="w-16 mt-1 text-center border border-blue-300 rounded-md text-xs bg-white/80 px-2 py-1 font-medium text-gray-700">
+                  <div className="w-16 mt-1 text-center border border-blue-300 rounded-md text-xs bg-white/80 px-2 py-1 font-medium text-blue-900 font-semibold">
                     {date}
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
             {totals.days.map((v, i) => (
               <td
                 key={i}
-                className="border border-green-300 text-blue-900 font-bold"
+                className="border border-green-300 text-red-900 font-bold pl-10"
               >
                 {formatDollar(v)}
               </td>
