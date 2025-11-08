@@ -94,7 +94,7 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
       <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Monthly FOB */}
         <div className="flex flex-col items-center justify-center bg-white border border-blue-200 rounded-2xl shadow-md p-5 h-36">
-          <span className="text-blue-700 text-2xl">📅</span>
+          {/* <span className="text-blue-700 text-2xl">📅</span> */}
           <h3 className="font-semibold text-blue-900 text-lg mt-1">Monthly FOB</h3>
           <p className="font-bold text-blue-800 text-xl mt-2">
             {isLoaded ? formatCurrency(dashboardData.monthlyUptoFOB) : '$0'}
@@ -103,7 +103,7 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
 
         {/* Yearly FOB */}
         <div className="flex flex-col items-center justify-center bg-white border border-green-200 rounded-2xl shadow-md p-5 h-36">
-          <span className="text-green-700 text-2xl">📈</span>
+          {/* <span className="text-green-700 text-2xl">📈</span> */}
           <h3 className="font-semibold text-green-900 text-lg mt-1">Yearly FOB</h3>
           <p className="font-bold text-green-800 text-xl mt-2">
             {isLoaded ? formatCurrency(dashboardData.yearlyUptoFOB) : '$0'}
@@ -112,7 +112,7 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
 
         {/* Run Day */}
         <div className="flex flex-col items-center justify-center bg-white border border-purple-200 rounded-2xl shadow-md p-5 h-36">
-          <span className="text-purple-700 text-2xl">🏃</span>
+          {/* <span className="text-purple-700 text-2xl">🏃</span> */}
           <h3 className="font-semibold text-purple-900 text-lg mt-1">Run Day</h3>
           <p className="font-bold text-purple-800 text-xl mt-2">
             {isLoaded ? dashboardData.runday : 0}
@@ -121,7 +121,7 @@ export default function DashboardPage({floorReports, fobReports, hourlyReports, 
 
         {/* Date & Time */}
         <div className="flex flex-col items-center justify-center bg-white border border-gray-300 rounded-2xl shadow-md p-5 h-36">
-          <span className="text-gray-700 text-2xl">⏰</span>
+          {/* <span className="text-gray-700 text-2xl">⏰</span> */}
           <h3 className="font-semibold text-gray-900 text-lg mt-1">Date & Time</h3>
           <p className="font-bold text-gray-800 text-md mt-1">
             {dateTime.toLocaleDateString()}

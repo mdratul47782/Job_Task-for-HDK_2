@@ -6,10 +6,12 @@ export default function FloorTable({ floorReports }) {
 
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
 
-  // 🔹 Today's date (MM/DD)
+  // 🔹 Yesterday's date (MM/DD) - since data is for previous day
   const today = new Date();
-  const month = today.getMonth() + 1;
-  const day = today.getDate();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const month = yesterday.getMonth() + 1;
+  const day = yesterday.getDate();
   const currentDate = `${month}/${day}`;
 
   const [date, setDate] = useState(currentDate);
@@ -29,7 +31,7 @@ export default function FloorTable({ floorReports }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 🔹 Track if there’s already an existing report
+  // 🔹 Track if there's already an existing report
   const [hasExistingReport, setHasExistingReport] = useState(!!existingReport);
 
   // 🔹 Update form fields if existing data changes (on reload)

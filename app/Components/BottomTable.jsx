@@ -186,7 +186,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
           <tr className="font-bold bg-gradient-to-r from-blue-400 to-blue-500 text-white">
             <td colSpan={4} className="py-3 text-center border border-blue-300 font-bold">
               GRAND TOTAL (Line + Mini + Short):{" "}
-              <span className="text-red-600 font-extrabold">
+              <span className="text-white-600 font-extrabold">
                 {formatNumber(grandTotal)}
               </span>
             </td>
