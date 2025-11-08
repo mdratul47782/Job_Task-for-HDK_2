@@ -108,7 +108,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
   const grandTotal = totals.regular + totals.mini + totals.short;
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 rounded-3xl border border-blue-200/60 bg-gradient-to-b from-blue-50 to-blue-100 shadow-2xl overflow-x-auto">
+    <div className="w-full max-w-7xl mx-auto p-2 rounded-3xl border border-blue-200/60 bg-gradient-to-b from-blue-50 to-blue-100 shadow-2xl overflow-x-auto">
       <table className="min-w-full border-collapse border border-blue-300 rounded-lg shadow-md overflow-hidden">
         <thead className="bg-gradient-to-r from-blue-400 to-blue-500 text-white sticky top-0 z-10">
           <tr>
