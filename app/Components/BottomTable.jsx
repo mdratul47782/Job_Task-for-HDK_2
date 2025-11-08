@@ -37,8 +37,12 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
   useEffect(() => {
     if (!floorReports || !hourlyReports) return;
 
-    const today = new Date().toISOString().split("T")[0];
-    const todayHourlyReport = hourlyReports.find((report) => report.date === today);
+    // 🔹 Get TODAY's date in YYYY-MM-DD format for hourly data
+    const today = new Date();
+    const todayFormatted = today.toISOString().split("T")[0];
+
+    // 🔹 Load hourly data from TODAY
+    const todayHourlyReport = hourlyReports.find((report) => report.date === todayFormatted);
 
     if (todayHourlyReport && todayHourlyReport.data) {
       setHourlyData({
@@ -61,7 +65,8 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
         if (report && report.data) {
           const floorEntry = report.data.find((d) => d.floor === floor);
           if (floorEntry) {
-            if (dayIndex === initialDates.length - 1) {
+            // 🔹 Show yesterday's data (second to last date) in Regular/Mini/Short columns
+            if (dayIndex === initialDates.length - 2) {
               floorData.regular = floorEntry.regular || 0;
               floorData.mini = floorEntry.mini || 0;
               floorData.short = floorEntry.short || 0;
@@ -76,7 +81,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
 
     setData(newData);
     setIsLoaded(true);
-  }, [floorReports, hourlyReports, initialDates]);
+  }, [floorReports, hourlyReports, initialDates, floors]);
 
   // Format numbers
   const formatNumber = (num) => new Intl.NumberFormat("en-US").format(num);
@@ -106,6 +111,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
                 className="border border-blue-300 px-3 py-2 text-center bg-gradient-to-b from-blue-300 to-blue-200 text-gray-800"
               >
                 <div className="flex flex-col items-center justify-center space-y-1 border-4 border-blue-100 rounded-lg p-2 bg-blue-50 shadow-sm">
+                  {/* 🔹 Show hourly data for LAST date (today) */}
                   {index === dates.length - 1 && isLoaded ? (
                     <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
                       <span>12H: {(hourlyData["12H"])}</span>
@@ -190,18 +196,9 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
                 {formatNumber(grandTotal)}
               </span>
             </td>
-            {/* {totals.days.map((v, i) => (
-              <td
-                key={i}
-                className="border border-blue-300 text-center text-yellow-200 font-extrabold"
-              >
-                {formatDollar(v)}
-              </td>
-            ))} */}
           </tr>
         </tbody>
       </table>
     </div>
   );
 }
-
