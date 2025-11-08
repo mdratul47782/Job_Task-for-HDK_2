@@ -5,24 +5,32 @@ export default function HourlyReportTable({ hourlyReports }) {
   console.log("⏰ Hourly Reports:", hourlyReports);
 
   const rowsLabels = ["12H", "10H", "8H"];
-  const today = new Date().toISOString().split("T")[0];
+  
+  // 📅 Get previous day's date
+  const getPreviousDay = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split("T")[0];
+  };
 
-  const [date, setDate] = useState(today);
+  const previousDay = getPreviousDay();
+
+  const [date, setDate] = useState(previousDay);
   const [data, setData] = useState({ "12H": "", "10H": "", "8H": "" });
   const [isExisting, setIsExisting] = useState(false);
   const [existingId, setExistingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 🔍 Check if today's data already exists
+  // 🔍 Check if previous day's data already exists
   useEffect(() => {
-    const found = hourlyReports.find((r) => r.date === today);
+    const found = hourlyReports.find((r) => r.date === previousDay);
     if (found) {
       setIsExisting(true);
       setExistingId(found._id);
       setData(found.data);
     }
-  }, [hourlyReports]);
+  }, [hourlyReports, previousDay]);
 
   const handleChange = (label, value) => {
     setData((prev) => ({ ...prev, [label]: value }));
@@ -49,6 +57,7 @@ export default function HourlyReportTable({ hourlyReports }) {
       if (res.ok) {
         setMessage("✅ Data saved successfully!");
         setIsExisting(true);
+        setExistingId(result.report._id);
       } else {
         setMessage(`❌ Error: ${result.error || "Failed to save data"}`);
       }

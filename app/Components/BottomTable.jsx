@@ -4,15 +4,26 @@ import { useState, useEffect, useMemo } from "react";
 export default function FloorTable({ floorReports, fobReports, hourlyReports, users }) {
   const floors = ["A2", "B2", "A3", "B3", "A4", "B4", "A5", "K3", "SMD"];
 
-  // Generate last 7 days
+  // Generate last 10 days
   const initialDates = useMemo(() => {
     const dates = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 9; i >= 0; i--) {
       const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
+      date.setDate(date.getDate() - i);
       const month = date.getMonth() + 1;
       const day = date.getDate();
       dates.push(`${month}/${day}`);
+    }
+    return dates;
+  }, []);
+
+  // Generate full date strings for matching with reports
+  const fullDates = useMemo(() => {
+    const dates = [];
+    for (let i = 9; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      dates.push(date.toISOString().split("T")[0]);
     }
     return dates;
   }, []);
@@ -26,31 +37,32 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
       days: initialDates.map(() => 0),
     }))
   );
-  const [hourlyData, setHourlyData] = useState({
-    "12H": 0,
-    "10H": 0,
-    "8H": 0,
-  });
+  const [hourlyDataByDate, setHourlyDataByDate] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load data
   useEffect(() => {
     if (!floorReports || !hourlyReports) return;
 
-    // 🔹 Get TODAY's date in YYYY-MM-DD format for hourly data
-    const today = new Date();
-    const todayFormatted = today.toISOString().split("T")[0];
-
-    // 🔹 Load hourly data from TODAY
-    const todayHourlyReport = hourlyReports.find((report) => report.date === todayFormatted);
-
-    if (todayHourlyReport && todayHourlyReport.data) {
-      setHourlyData({
-        "12H": todayHourlyReport.data["12H"] || 0,
-        "10H": todayHourlyReport.data["10H"] || 0,
-        "8H": todayHourlyReport.data["8H"] || 0,
-      });
-    }
+    // 🔹 Load hourly data for all dates
+    const hourlyMap = {};
+    fullDates.forEach((fullDate, index) => {
+      const report = hourlyReports.find((r) => r.date === fullDate);
+      if (report && report.data) {
+        hourlyMap[index] = {
+          "12H": report.data["12H"] || 0,
+          "10H": report.data["10H"] || 0,
+          "8H": report.data["8H"] || 0,
+        };
+      } else {
+        hourlyMap[index] = {
+          "12H": 0,
+          "10H": 0,
+          "8H": 0,
+        };
+      }
+    });
+    setHourlyDataByDate(hourlyMap);
 
     const newData = floors.map((floor) => {
       const floorData = {
@@ -65,7 +77,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
         if (report && report.data) {
           const floorEntry = report.data.find((d) => d.floor === floor);
           if (floorEntry) {
-            // 🔹 Show yesterday's data (second to last date) in Regular/Mini/Short columns
+            // 🔹 Show previous day's data (second to last date) in Regular/Mini/Short columns
             if (dayIndex === initialDates.length - 2) {
               floorData.regular = floorEntry.regular || 0;
               floorData.mini = floorEntry.mini || 0;
@@ -81,7 +93,7 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
 
     setData(newData);
     setIsLoaded(true);
-  }, [floorReports, hourlyReports, initialDates, floors]);
+  }, [floorReports, hourlyReports, initialDates, fullDates, floors]);
 
   // Format numbers
   const formatNumber = (num) => new Intl.NumberFormat("en-US").format(num);
@@ -111,18 +123,18 @@ export default function FloorTable({ floorReports, fobReports, hourlyReports, us
                 className="border border-blue-300 px-3 py-2 text-center bg-gradient-to-b from-blue-300 to-blue-200 text-gray-800"
               >
                 <div className="flex flex-col items-center justify-center space-y-1 border-4 border-blue-100 rounded-lg p-2 bg-blue-50 shadow-sm">
-                  {/* 🔹 Show hourly data for LAST date (today) */}
-                  {index === dates.length - 1 && isLoaded ? (
+                  {/* 🔹 Show hourly data for each date */}
+                  {isLoaded && hourlyDataByDate[index] ? (
                     <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
-                      <span>12H: {(hourlyData["12H"])}</span>
-                      <span>10H: {(hourlyData["10H"])}</span>
-                      <span>8H: {(hourlyData["8H"])}</span>
+                      <span>12H: {hourlyDataByDate[index]["12H"]}</span>
+                      <span>10H: {hourlyDataByDate[index]["10H"]}</span>
+                      <span>8H: {hourlyDataByDate[index]["8H"]}</span>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center text-xs text-blue-900 font-semibold leading-tight">
-                      <span>12H:</span>
-                      <span>10H:</span>
-                      <span>8H:</span>
+                      <span>12H: 0</span>
+                      <span>10H: 0</span>
+                      <span>8H: 0</span>
                     </div>
                   )}
                   <div className="w-16 mt-1 text-center border border-blue-300 rounded-md text-xs bg-white/80 px-2 py-1 font-medium text-blue-900 font-semibold">
